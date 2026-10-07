@@ -1,0 +1,30 @@
+{
+  "name": "dsh-hosted-tools",
+  "version": "0.0.1",
+  "description": "Provider-hosted tools for DSH: xAI web/X search, code execution, image generation/edit; ChatGPT image generation (from pi-hosted-tools).",
+  "type": "module",
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./client": "./client/client.js"
+  },
+  "files": ["src", "client", "cordis.patch.yml", "README.md"],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "inject": ["slots", "remote"]
+    }
+  },
+  "peerDependencies": {
+    "@deepseek-ai/dsh-credentials": "0.2.0-rc.2",
+    "@deepseek-ai/dsh-llm": "0.2.0-rc.2",
+    "@deepseek-ai/dsh-session": "0.2.0-rc.2",
+    "@deepseek-ai/dsh-tools": "0.2.0-rc.2",
+    "@deepseek-ai/schemastery": "~3.18.4"
+  },
+  "license": "MIT",
+  "private": true
+}

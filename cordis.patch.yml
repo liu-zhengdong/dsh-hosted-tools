@@ -1,0 +1,7 @@
+# 组合包补丁层：profile 的 dsh.profile.bundles 里列出本包时应用。
+# 这里不写 config：每个工具字段的默认值由 src/index.js 的 Config schema 给出（唯一来源），
+# 用户在「设置 → 内置插件 → 托管工具」里改，改动由 configEditor 写进当前 profile 的
+# cordis.patch.yml；值等于默认值时那一行 config 会被清掉，所以这里保持干净。
+- insert:
+    - id: dsh-hosted-tools
+      name: dsh-hosted-tools
