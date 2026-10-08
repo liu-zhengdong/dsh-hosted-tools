@@ -40,3 +40,4 @@ client 半只注册这个页签，真正干活的是宿主侧 `src/auth-remote.j
 - pi 版的 xAI 托管搜索走 pi 的 `samplingParams` 让 pi-ai 在采样时加 `tools`；DSH 没有这条透传通道，改为插件直接 POST Responses API——模型与工具执行仍在 xAI 侧，只是请求发起者是插件。
 - pi 版开关存在 `~/.pi/agent/hosted-tools.json` 且带 UI；DSH 版就是插件 Config，UI 在插件设置页里（见上）。
 - pi 版异步结果回写终端；DSH 版通过 `agent.followup` 注入当前会话（来源 kind `dsh-hosted-tools`），并 `sessions.flush` 落盘。
+- 界面直接用宿主设计系统的 `@deepseek-ai/dsh-client-ui-primitives`（Button / Tag / SegmentedControl）与 `--dsw-*` 设计令牌，随宿主明暗主题；不手搓按钮、分段控件与色板。

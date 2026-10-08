@@ -10,6 +10,10 @@ window.__ModuleLoader__.load({
     var useEffect = React.useEffect;
     var useRef = React.useRef;
 
+    // 宿主的 UI 原语包：Button / Tag / SegmentedControl / Switch 都自带宿主样式，
+    // 不再手搓按钮与分段控件（见 README 的「与 pi 版的差别」）。
+    var UI = require("@deepseek-ai/dsh-client-ui-primitives");
+
     var name = "dsh-hosted-tools";
     var inject = ["slots", "remote"];
 
@@ -111,54 +115,56 @@ window.__ModuleLoader__.load({
     }
 
     // ---- 样式 --------------------------------------------------------------
+    // 只用宿主设计系统的 --dsw-* token（暗/亮主题自动跟随），不引入自己的色板。
     var S = {
       page: { display: "flex", flexDirection: "column", gap: "16px", fontSize: "13px" },
-      card: {
-        display: "flex", flexDirection: "column", gap: "8px", padding: "12px 14px",
-        border: "1px solid var(--border, #e0e0e0)", borderRadius: "8px",
+      section: {
+        fontWeight: 600, fontSize: "14px",
+        color: "var(--dsw-alias-label-primary, inherit)",
       },
-      head: { display: "flex", alignItems: "center", gap: "8px" },
-      title: { fontWeight: 600, fontSize: "14px" },
-      badge: {
-        fontSize: "11px", padding: "1px 8px", borderRadius: "999px",
-        background: "var(--accent, #4c8dff)", color: "#fff",
+      hint: {
+        color: "var(--dsw-alias-label-secondary, #888)",
+        lineHeight: 1.6, fontSize: "13px",
       },
-      hint: { color: "var(--text-secondary, #888)", lineHeight: 1.6 },
-      warn: { color: "var(--warning, #d29922)", lineHeight: 1.6 },
-      error: { color: "var(--danger, #e5534b)", lineHeight: 1.6, wordBreak: "break-word" },
+      warn: {
+        color: "var(--dsw-alias-state-warn-primary, #d29922)",
+        lineHeight: 1.6, fontSize: "13px",
+      },
+      error: {
+        color: "var(--dsw-alias-state-error-primary, #e5534b)",
+        lineHeight: 1.6, wordBreak: "break-word", fontSize: "13px",
+      },
       row: { display: "flex", flexDirection: "column", gap: "4px" },
       actions: { display: "flex", gap: "8px", flexWrap: "wrap" },
-      btn: {
-        padding: "5px 14px", fontSize: "12px", cursor: "pointer", borderRadius: "6px",
-        border: "1px solid var(--accent, #4c8dff)", background: "var(--accent, #4c8dff)", color: "#fff",
+      link: {
+        color: "var(--dsw-alias-link, var(--dsw-alias-brand-primary, #4c8dff))",
+        wordBreak: "break-all",
       },
-      btnSubtle: {
-        padding: "5px 14px", fontSize: "12px", cursor: "pointer", borderRadius: "6px",
-        border: "1px solid var(--border, #d0d0d0)", background: "transparent", color: "inherit",
+      code: {
+        fontFamily: "monospace", fontSize: "15px", letterSpacing: "2px", fontWeight: 600,
+        color: "var(--dsw-alias-label-primary, inherit)",
       },
-      code: { fontFamily: "monospace", fontSize: "15px", letterSpacing: "2px", fontWeight: 600 },
-      link: { color: "var(--accent, #4c8dff)", wordBreak: "break-all" },
       input: {
-        padding: "5px 8px", fontSize: "12px", borderRadius: "5px", width: "320px",
-        border: "1px solid var(--border, #d0d0d0)", background: "transparent", color: "inherit",
+        padding: "5px 8px", fontSize: "13px", borderRadius: "var(--dsw-radius-sm, 6px)",
+        width: "320px", maxWidth: "100%", boxSizing: "border-box",
+        border: "1px solid var(--dsw-alias-border-l3, #d0d0d0)",
+        background: "var(--dsw-alias-bg-base, transparent)", color: "inherit",
       },
-      section: { fontWeight: 600, fontSize: "14px" },
-      divider: { borderTop: "1px solid var(--border, #e0e0e0)" },
-      group: { display: "flex", flexDirection: "column", gap: "12px" },
-      toolRow: { display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "12px" },
-      toolText: { display: "flex", flexDirection: "column", gap: "2px", minWidth: 0 },
-      mono: { fontFamily: "monospace", fontSize: "12px" },
-      seg: {
-        display: "flex", flexShrink: 0, borderRadius: "6px", overflow: "hidden",
-        border: "1px solid var(--border, #d0d0d0)",
+      // 工具暴露：一行一条，不再用卡片与手搓分段。
+      toolRow: {
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        gap: "16px", padding: "10px 0",
+        borderBottom: "1px solid var(--dsw-alias-border-l2, #e0e0e0)",
       },
-      segOn: {
-        padding: "4px 10px", fontSize: "12px", cursor: "pointer", border: "none",
-        background: "var(--accent, #4c8dff)", color: "#fff",
+      toolText: { display: "flex", flexDirection: "column", gap: "3px", minWidth: 0 },
+      toolTitle: {
+        fontWeight: 500, fontSize: "13px",
+        color: "var(--dsw-alias-label-primary, inherit)",
       },
-      segOff: {
-        padding: "4px 10px", fontSize: "12px", cursor: "pointer", border: "none",
-        background: "transparent", color: "inherit",
+      toolSub: {
+        fontSize: "12px",
+        color: "var(--dsw-alias-label-tertiary, #999)",
+        fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
       },
     };
 
@@ -189,7 +195,7 @@ window.__ModuleLoader__.load({
               var id = typeof option === "string" ? option : (option.id != null ? option.id : option.value);
               var label = typeof option === "string" ? option : (option.label || String(id));
               return createElement("button", {
-                key: String(id), style: S.btnSubtle,
+                key: String(id), variant: "outline", size: "sm",
                 onClick: function () { props.onAnswer(id); },
               }, label);
             }),
@@ -209,7 +215,7 @@ window.__ModuleLoader__.load({
             onChange: function (event) { setValue(event.target.value); },
             onKeyDown: function (event) { if (event.key === "Enter") props.onAnswer(value); },
           }),
-          createElement("button", { style: S.btnSubtle, onClick: function () { props.onAnswer(value); } }, "提交"),
+          createElement(UI.Button, { variant: "outline", size: "sm", onClick: function () { props.onAnswer(value); } }, "提交"),
         ),
       );
     }
@@ -316,13 +322,29 @@ window.__ModuleLoader__.load({
           props.account.expired !== true);
       var expired = !loggedIn && props.account !== null && props.account !== undefined && props.account.expired === true;
 
+      /** 状态徽章：只读事实用 Tag，登录中/失败用文字。 */
+      function stateBadge() {
+        if (status === "running") {
+          return createElement(UI.StateDot, { state: "ongoing" });
+        }
+        if (status === "failed") {
+          return createElement("span", { style: S.error }, "登录失败");
+        }
+        if (loggedIn) {
+          return createElement(UI.Tag, { tone: "success" }, "已登录");
+        }
+        if (expired) {
+          return createElement(UI.Tag, { tone: "warning" }, "凭据已过期");
+        }
+        return createElement(UI.Tag, { tone: "outline" }, "未登录");
+      }
+
       var children = [];
-      var head = [createElement("span", { key: "t", style: S.title }, props.provider.label)];
-      if (status === "running") head.push(createElement("span", { key: "b", style: S.hint }, "登录中…"));
-      else if (loggedIn) head.push(createElement("span", { key: "b", style: S.badge }, "已登录"));
-      else if (expired) head.push(createElement("span", { key: "b", style: S.hint }, "凭据已过期"));
-      else head.push(createElement("span", { key: "b", style: S.hint }, "未登录"));
-      children.push(createElement("div", { key: "head", style: S.head }, head));
+      var head = [
+        createElement("span", { key: "t", style: S.section }, props.provider.label),
+        stateBadge(),
+      ];
+      children.push(createElement("div", { key: "head", style: { display: "flex", alignItems: "center", gap: "8px" } }, head));
       children.push(createElement("div", { key: "about", style: S.hint }, props.provider.about));
 
       if (props.flow === null) {
@@ -332,12 +354,13 @@ window.__ModuleLoader__.load({
 
       var buttons = [];
       if (status !== "running") {
-        buttons.push(createElement("button", {
-          key: "go", style: S.btn, onClick: begin,
+        buttons.push(createElement(UI.Button, {
+          key: "go", variant: "primary", size: "sm",
+          onClick: begin,
           disabled: props.flow === null,
         }, loggedIn ? "重新登录" : "登录"));
       } else {
-        buttons.push(createElement("button", { key: "stop", style: S.btnSubtle, onClick: cancel }, "取消"));
+        buttons.push(createElement(UI.Button, { key: "stop", variant: "ghost", size: "sm", onClick: cancel }, "取消"));
       }
       children.push(createElement("div", { key: "actions", style: S.actions }, buttons));
 
@@ -362,7 +385,13 @@ window.__ModuleLoader__.load({
         children.push(createElement("div", { key: "error", style: S.error }, error));
       }
 
-      return createElement("div", { style: S.card }, children);
+      return createElement("div", {
+        style: {
+          display: "flex", flexDirection: "column", gap: "8px", padding: "12px 14px",
+          border: "1px solid var(--dsw-alias-border-l2, #e0e0e0)",
+          borderRadius: "var(--dsw-radius-md, 8px)",
+        },
+      }, children);
     }
 
     /**
@@ -471,7 +500,6 @@ window.__ModuleLoader__.load({
         status: snapshot.status,
         mode: snapshot.mode,
         value: snapshot.value || {},
-        user: snapshot.user || {},
         schema: view ? view.schema : undefined,
       };
     }
@@ -530,36 +558,37 @@ window.__ModuleLoader__.load({
       var ready = view.status === "ready";
       var nodes = schemaNodes(view.schema);
       var fields = nodes.root && nodes.root.dict ? Object.keys(nodes.root.dict) : Object.keys(view.value);
-      return createElement("div", { style: S.group },
+      return createElement("div", { style: { display: "flex", flexDirection: "column" } },
         createElement("div", { style: S.section }, "暴露给 DSH 的工具"),
         createElement("div", { style: S.hint },
           "注册过的工具模型才看得见。同步工具等结果；后台异步工具立刻回执，跑完把结果作为一条消息注入"
           + "当前会话，这时会额外提供 hosted_jobs 供查看与取回。"),
-        fields.map(function (field) {
-          var meta = fieldMeta(nodes, field);
-          var current = view.value[field];
-          // 这一项在 profile 里有没有显式覆盖：选中的默认值再点一下就是清掉覆盖。
-          var overridden = view.user[field] !== undefined;
-          return createElement("div", { key: field, style: S.card },
-            createElement("div", { style: S.toolRow },
+        createElement("div", { style: { marginTop: "4px" } },
+          fields.map(function (field, index) {
+            var meta = fieldMeta(nodes, field);
+            var current = view.value[field];
+            var busyThis = busy === field;
+            return createElement("div", {
+              key: field,
+              style: Object.assign({}, S.toolRow, index === fields.length - 1 ? { borderBottom: "none" } : null),
+            },
               createElement("div", { style: S.toolText },
-                createElement("div", { style: S.title }, meta.comment || field),
-                createElement("div", { style: S.mono }, field),
-                createElement("div", { style: S.hint }, meta.description || ""),
+                createElement("div", { style: S.toolTitle, title: meta.description || "" }, meta.comment || field),
+                createElement("div", { style: S.toolSub }, field),
               ),
-              createElement("div", { style: S.seg }, MODES.map(function (pair) {
-                var selected = current === pair[0];
-                return createElement("button", {
-                  key: pair[0],
-                  style: selected ? S.segOn : S.segOff,
-                  disabled: !ready || busy === field || (selected && !overridden),
-                  onClick: function () { choose(field, pair[0], meta.default === pair[0]); },
-                }, pair[1]);
-              })),
-            ),
-          );
-        }),
-        failure === null ? null : createElement("div", { style: S.error }, failure),
+              createElement(UI.SegmentedControl, {
+                id: "exposure-" + field, label: meta.comment || field,
+                value: current,
+                disabled: !ready || busyThis,
+                options: MODES.map(function (pair) {
+                  return { value: pair[0], label: pair[1] };
+                }),
+                onChange: function (mode) { choose(field, mode, meta.default === mode); },
+              }),
+            );
+          }),
+        ),
+        failure === null ? null : createElement("div", { style: Object.assign({ marginTop: "8px" }, S.error) }, failure),
       );
     }
 
@@ -575,7 +604,6 @@ window.__ModuleLoader__.load({
       return createElement("div", { style: S.page },
         createElement("div", { style: S.section }, "登录"),
         createElement(AuthPanel, { ctx: props.ctx, mount: props.mount }),
-        createElement("div", { style: S.divider }),
         forms === undefined
           ? createElement("div", { style: S.warn }, "宿主没有提供配置服务（configForms），工具暴露设置不可用。")
           : createElement(ExposurePanel, { forms: forms }),
