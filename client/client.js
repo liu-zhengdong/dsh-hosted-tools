@@ -156,6 +156,14 @@ window.__ModuleLoader__.load({
         gap: "16px", padding: "10px 0",
         borderBottom: "1px solid var(--dsw-alias-border-l2, #e0e0e0)",
       },
+      // 登录：一行一个 provider，按钮靠右，与工具行同一个版式。
+      providerRow: {
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        gap: "16px",
+      },
+      providerText: { display: "flex", flexDirection: "column", gap: "3px", minWidth: 0, flex: 1 },
+      providerHead: { display: "flex", alignItems: "center", gap: "8px", minWidth: 0 },
+      providerAction: { flexShrink: 0, display: "flex", gap: "8px" },
       toolText: { display: "flex", flexDirection: "column", gap: "3px", minWidth: 0 },
       toolTitle: {
         fontWeight: 500, fontSize: "13px",
@@ -344,14 +352,6 @@ window.__ModuleLoader__.load({
         createElement("span", { key: "t", style: S.section }, props.provider.label),
         stateBadge(),
       ];
-      children.push(createElement("div", { key: "head", style: { display: "flex", alignItems: "center", gap: "8px" } }, head));
-      children.push(createElement("div", { key: "about", style: S.hint }, props.provider.about));
-
-      if (props.flow === null) {
-        children.push(createElement("div", { key: "missing", style: S.warn },
-          "没有找到登录流 " + key + "。这个流由 llm-pi-ai 插件注册，请确认它已加载。"));
-      }
-
       var buttons = [];
       if (status !== "running") {
         buttons.push(createElement(UI.Button, {
@@ -362,7 +362,17 @@ window.__ModuleLoader__.load({
       } else {
         buttons.push(createElement(UI.Button, { key: "stop", variant: "ghost", size: "sm", onClick: cancel }, "取消"));
       }
-      children.push(createElement("div", { key: "actions", style: S.actions }, buttons));
+
+      children.push(createElement("div", { key: "row", style: S.providerRow },
+        createElement("div", { key: "text", style: S.providerText },
+          createElement("div", { key: "head", style: S.providerHead }, head),
+          createElement("div", { key: "about", style: S.hint }, props.provider.about)),
+        createElement("div", { key: "action", style: S.providerAction }, buttons)));
+
+      if (props.flow === null) {
+        children.push(createElement("div", { key: "missing", style: S.warn },
+          "没有找到登录流 " + key + "。这个流由 llm-pi-ai 插件注册，请确认它已加载。"));
+      }
 
       notices.forEach(function (notice, index) {
         var parts = [];
