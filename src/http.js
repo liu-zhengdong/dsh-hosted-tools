@@ -51,7 +51,7 @@ async function postJson(url, headers, body, signal, label) {
  * @returns {Promise<{text: string, model: string}>}
  */
 export async function xaiHostedRun(credentials, toolTypes, input, signal) {
-  const { accessToken } = await oauthCredential(credentials, "xai");
+  const { accessToken } = await oauthCredential(credentials, "xai", signal);
   const payload = await postJson(
     XAI_RESPONSES_URL,
     { authorization: `Bearer ${accessToken}` },
@@ -102,7 +102,7 @@ export async function xaiGenerateImage(credentials, request) {
 }
 
 async function xaiCreateImage(credentials, request) {
-  const { accessToken } = await oauthCredential(credentials, "xai");
+  const { accessToken } = await oauthCredential(credentials, "xai", request.signal);
   const body = { prompt: request.prompt, response_format: "url" };
   if (request.model) body.model = request.model;
   if (request.n) body.n = request.n;
@@ -121,7 +121,7 @@ async function xaiCreateImage(credentials, request) {
  * 每项 `{ type: "image_url", url }`；传 multipart/form-data 会被回 415。
  */
 async function xaiEditImage(credentials, request) {
-  const { accessToken } = await oauthCredential(credentials, "xai");
+  const { accessToken } = await oauthCredential(credentials, "xai", request.signal);
   const images = [];
   for (const reference of request.images) {
     images.push({ type: "image_url", url: await toDataUrl(reference) });
@@ -179,7 +179,7 @@ async function toDataUrl(reference) {
  * @returns {Promise<{answer: string, sources: Array<{url: string, title?: string, snippet?: string}>}>}
  */
 export async function codexWebSearch(credentials, request) {
-  const creds = await codexCredentials(credentials);
+  const creds = await codexCredentials(credentials, request.signal);
   const payload = await postCodex(
     CODEX_SEARCH_URL,
     creds,
@@ -223,7 +223,7 @@ export async function codexWebSearch(credentials, request) {
  * @returns {Promise<{base64: string, mimeType: string, id?: string, revisedPrompt?: string}>}
  */
 export async function codexImage(credentials, request) {
-  const creds = await codexCredentials(credentials);
+  const creds = await codexCredentials(credentials, request.signal);
   const editing = (request.images?.length ?? 0) > 0;
   const common = {
     prompt: request.prompt,

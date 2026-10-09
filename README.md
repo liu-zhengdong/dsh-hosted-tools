@@ -27,7 +27,9 @@ pi-hosted-tools 的 DSH 移植：把 provider 托管能力（网页搜索、X �
 
 ## 凭据
 
-读 `llm-pi-ai` 凭据域（`credentialKey("llm-pi-ai", providerId)`），与 `dsh-llm-pi-ai` 登录写入的是同一份。xAI 工具用 `xai` provider，codex 工具用 `openai-codex` provider。令牌过期时报错提示重新登录；插件不刷新令牌。
+读 `llm-pi-ai` 凭据域（`credentialKey("llm-pi-ai", providerId)`），与 `dsh-llm-pi-ai` 登录写入的是同一份。xAI 巭具用 `xai` provider，codex 工具用 `openai-codex` provider。
+
+令牌在过期前 5 分钟内自动刷新：用 `payload.refresh` 去 provider 的 OAuth 端点（与 pi-ai 同一个 client_id）换新令牌，经 `credentials.modifyRecord` 写回——持文件锁、锁内先与磁盘对账，别的调用方刚刷过就不重复刷。刷新失败（如 refresh token 被吊销）时报错提示重新登录。xAI 的 access token 约 6 小时一换，codex 约 10 天，所以 xAI 更依赖这条刷新路径。
 
 ## 登录
 

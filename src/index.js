@@ -14,7 +14,8 @@
  *   `exec.agent`，完成时用 `agent.followup` 把结果作为一条消息注入该会话。
  *
  * 凭据：统一读 `llm-pi-ai` 凭据域（dsh-llm-pi-ai 登录时写入），key 是
- * `credentialKey("llm-pi-ai", providerId)`；插件不刷新令牌，过期时报错提示重新登录。
+ * `credentialKey("llm-pi-ai", providerId)`；令牌过期前 5 分钟自动刷新并写回，
+ * 刷新失败（refresh token 被吊销）才报错提示重新登录，见 credentials.js。
  */
 
 import z from "@deepseek-ai/schemastery";
